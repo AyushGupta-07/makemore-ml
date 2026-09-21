@@ -1,81 +1,230 @@
 
-# makemore
+````markdown
+# Character-Level Language Model — Makemore
 
-makemore takes one text file as input, where each line is assumed to be one training thing, and generates more things like it. Under the hood, it is an autoregressive character-level language model, with a wide choice of models from bigrams all the way to a Transformer (exactly as seen in GPT). For example, we can feed it a database of names, and makemore will generate cool baby name ideas that all sound name-like, but are not already existing names. Or if we feed it a database of company names then we can generate new ideas for a name of a company. Or we can just feed it valid scrabble words and generate english-like babble.
+A character-level language modeling project built with PyTorch to explore how Transformer-based language models learn to generate new names from a text dataset.
 
-This is not meant to be too heavyweight library with a billion switches and knobs. It is one hackable file, and is mostly intended for educational purposes. [PyTorch](https://pytorch.org) is the only requirement.
+The project demonstrates the core concepts behind modern language models, including token embeddings, self-attention, Transformer blocks, feed-forward networks, optimization, training loss, model checkpointing, and text generation.
 
-Current implementation follows a few key papers:
+---
 
-- Bigram (one character predicts the next one with a lookup table of counts)
-- MLP, following [Bengio et al. 2003](https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf)
-- CNN, following [DeepMind WaveNet 2016](https://arxiv.org/abs/1609.03499) (in progress...)
-- RNN, following [Mikolov et al. 2010](https://www.fit.vutbr.cz/research/groups/speech/publi/2010/mikolov_interspeech2010_IS100722.pdf)
-- LSTM, following [Graves et al. 2014](https://arxiv.org/abs/1308.0850)
-- GRU, following [Kyunghyun Cho et al. 2014](https://arxiv.org/abs/1409.1259)
-- Transformer, following [Vaswani et al. 2017](https://arxiv.org/abs/1706.03762)
+## Project Overview
 
-### Usage
+This project uses a dataset of names to train a small character-level Transformer language model.
 
-The included `names.txt` dataset, as an example, has the most common 32K names takes from [ssa.gov](https://www.ssa.gov/oact/babynames/) for the year 2018. It looks like:
+Instead of predicting complete words directly, the model learns to predict the next character based on the preceding characters. After training, the model can generate new name-like sequences that resemble patterns learned from the training data.
 
+### Example Generated Outputs
+
+Examples produced during training include:
+
+```text
+eshav
+deicra
+mabez
+axzut
+anasses
+rozalena
+barnon
+zareeh
+````
+
+These outputs demonstrate the model's ability to generate previously unseen character sequences based on learned patterns.
+
+---
+
+## Key Concepts
+
+* Character-level language modeling
+* Token and positional embeddings
+* Self-attention
+* Transformer architecture
+* Multi-layer perceptron / feed-forward networks
+* Layer normalization
+* Autoregressive next-token prediction
+* Cross-entropy loss
+* Gradient-based optimization
+* Model checkpointing
+* TensorBoard training logs
+* Text generation
+
+---
+
+## Technology Stack
+
+* **Python**
+* **PyTorch**
+* **NumPy**
+* **TensorBoard**
+* **Transformer architecture**
+* **Git & GitHub**
+
+---
+
+## Model Architecture
+
+The project implements a compact Transformer-based language model.
+
+The overall flow is:
+
+```text
+Input Names
+     ↓
+Character Tokenization
+     ↓
+Character Embeddings
+     ↓
+Positional Information
+     ↓
+Self-Attention
+     ↓
+Feed-Forward / MLP
+     ↓
+Layer Normalization
+     ↓
+Next-Character Prediction
+     ↓
+Generated Text
 ```
-emma
-olivia
-ava
-isabella
-sophia
-charlotte
-...
+
+The model is trained autoregressively, meaning that each predicted character becomes part of the context used to predict subsequent characters.
+
+---
+
+## Dataset
+
+The model uses `names.txt`, where each line contains a name.
+
+The dataset is used to create character sequences for next-character prediction.
+
+The model learns statistical patterns such as:
+
+* Which characters commonly follow one another
+* Common character combinations
+* Name-length patterns
+* Character-level structure of names
+
+---
+
+## Training
+
+The model was trained using PyTorch on a CPU environment.
+
+Training progress is recorded using TensorBoard, allowing loss and training behavior to be inspected over time.
+
+A trained model checkpoint is stored in:
+
+```text
+out/model.pt
 ```
 
-Let's point the script at it:
+TensorBoard event files are also stored in:
+
+```text
+out/
+```
+
+---
+
+## Running the Project
+
+### 1. Clone the repository
 
 ```bash
-$ python makemore.py -i names.txt -o names
+git clone https://github.com/AyushGupta-07/makemore-ml.git
+cd makemore-ml
 ```
 
-Training progress and logs and model will all be saved to the working directory `names`. The default model is a super tiny 200K param transformer; Many more training configurations are available - see the argparse and read the code. Training does not require any special hardware, it runs on my Macbook Air and will run on anything else, but if you have a GPU then training will fly faster. As training progresses the script will print some samples throughout. However, if you'd like to sample manually, you can use the `--sample-only` flag, e.g. in a separate terminal do:
+### 2. Install dependencies
 
 ```bash
-$ python makemore.py -i names.txt -o names --sample-only
+python -m pip install torch tensorboard
 ```
 
-This will load the best model so far and print more samples on demand. Here are some unique baby names that get eventually generated from current default settings (test logprob of ~1.92, though much lower logprobs are achievable with some hyperparameter tuning):
+### 3. Run the model
 
-```
-dontell
-khylum
-camatena
-aeriline
-najlah
-sherrith
-ryel
-irmi
-taislee
-mortaz
-akarli
-maxfelynn
-biolett
-zendy
-laisa
-halliliana
-goralynn
-brodynn
-romima
-chiyomin
-loghlyn
-melichae
-mahmed
-irot
-helicha
-besdy
-ebokun
-lucianno
+```bash
+python makemore.py
 ```
 
-Have fun!
+The script trains the model and generates name-like sequences.
 
-### License
+---
 
-MIT
+## TensorBoard
+
+Training logs can be visualized using TensorBoard.
+
+Run:
+
+```bash
+tensorboard --logdir out
+```
+
+Then open the local TensorBoard address displayed in the terminal.
+
+---
+
+## Project Structure
+
+```text
+makemore-ml/
+│
+├── makemore.py
+├── names.txt
+├── README.md
+├── LICENSE
+│
+└── out/
+    ├── model.pt
+    └── events.out.tfevents.*
+```
+
+---
+
+## Learning Outcomes
+
+Through this project, I explored:
+
+* How character-level language models represent text
+* How Transformer architectures process sequential data
+* How self-attention helps models learn contextual relationships
+* How neural networks are trained using gradient descent
+* How language models perform autoregressive generation
+* How to monitor training using TensorBoard
+* How trained model checkpoints can be saved and reused
+
+---
+
+## Portfolio Context
+
+This project is part of my machine learning and AI engineering portfolio, with a focus on understanding the foundations behind modern NLP and generative AI systems.
+
+It complements my other projects involving:
+
+* End-to-end machine learning
+* MLOps
+* Customer churn prediction
+* Fraud detection
+* NLP and language modeling
+
+---
+
+## Attribution
+
+This project is an **adapted learning implementation based on Andrej Karpathy's open-source `makemore` project**, used for educational and portfolio learning purposes.
+
+Original project:
+
+[https://github.com/karpathy/makemore](https://github.com/karpathy/makemore)
+
+The original implementation and educational material are credited to Andrej Karpathy.
+
+---
+
+## Author
+
+**Ayush Gupta**
+
+GitHub:
+[https://github.com/AyushGupta-07](https://github.com/AyushGupta-07)
